@@ -12,11 +12,14 @@
 
 ## Usage
 ```
-git clone xxxx
+//git clone 或 下载
+git clone https://github.com/baizhebz/html2markdown4blog.git
 
-cd xxxx
-//编辑setting文件中的配置，填入要转换的目录页地址或单独的文章的地址
+cd html2markdown4blog
 
+//编辑setting.php文件中的配置，填入要转换的目录页地址或单独的文章的地址
+
+//在CLI模式下运行，或者部署到你的web server，使用curl或在浏览器里访问
 php start.php
 ```
 
