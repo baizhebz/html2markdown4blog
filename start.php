@@ -61,7 +61,7 @@ foreach ($post_list as $index=>$eachPost) {
     $post_parser->save2md();
 
     $title = isset($eachPost['title']) ? $eachPost['title'] : $post_parser->get_title();
-    echo '第' . ++$index . '篇文章:' . $title . ',处理完成';
+    echo 'the ' . ordinalize(++$index). ' article already generated, title: ' . $title;
     echo "\n";
 
     @ob_flush();

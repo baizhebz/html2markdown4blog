@@ -38,3 +38,13 @@ function config_item($key, $default = '') {
 
     return isset($config[$key]) ? $config[$key] : $default;
 }
+
+/**
+ * generate ordinal number with suffix
+ * @param $num
+ * @return string
+ */
+function ordinalize($num) {
+    $suffix = $num < 4 ? ($num < 3 ? ($num < 2 ? 'st' : 'nd') : 'rd') : 'th';
+    return $num . $suffix;
+}

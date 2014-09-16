@@ -6,9 +6,12 @@ class PostPageParser {
 
     private $_title;
 
+    // A UNIX Timestamp
     private $_date;
 
     private $_tags;
+
+    private $_categories;
 
     private $_md_content;
 
@@ -32,13 +35,16 @@ class PostPageParser {
         $this->_title = '';
         $this->_date = '';
         $this->_tags = array();
+        $this->_categories = array();
         $this->_md_content = '';
         unset($this->_source);
         $this->_source = '';
     }
 
     private function _prepare4csdn() {
-        //csdn里，你在编辑器里敲一个换行，会被转换成<p><br></p>的形式
+        //去掉空的段落 <p></p>
+        $this->_source = preg_replace("#<p></p>#", "<br>", $this->_source);
+        //csdn里，你在编辑器里敲一个换行，可能会被转换成<p><br></p>的形式
         $this->_source = preg_replace("#<p>\s*(<br/?>)+\s*</p>#i", "<br>", $this->_source);
         //csdn里，<p>标签结束前会加上一个<br/>
         $this->_source = preg_replace("#<br/?>\s*</p>#i", "</p>", $this->_source);
@@ -58,21 +64,34 @@ class PostPageParser {
             switch ($div_class) {
                 case 'article_title':
                     $title = trim($div->nodeValue);
-                    $title = str_replace(array('\r', '\n', '\r\n'), '', $title);
+                    $title = str_replace(array('\n'), '', $title);
                     $this->_title = $title;
                     break;
 
                 case 'article_manage':
                     foreach ($div->childNodes as $_mag_item) {
-                        if ($_mag_item->nodeType == XML_ELEMENT_NODE && $_mag_item->getAttribute('class') == 'link_postdate') {
-                            $this->_date = trim($_mag_item->nodeValue);
+                        if ($_mag_item->nodeType == XML_ELEMENT_NODE) {
+                            $_class = $_mag_item->getAttribute('class');
+                            if ($_class == 'link_categories') {
+                                $_anchors = $_mag_item->getElementsByTagName('a');
+                                $_i = 0;
+                                while ($_a = $_anchors->item($_i++)) {
+                                    $this->_categories[] = trim($_a->nodeValue);
+                                }
+                            } else if ($_class == 'link_postdate') {
+                                $_date = trim($_mag_item->nodeValue);
+                                $this->_date = strtotime($_date);
+                            }
                         }
                     }
                     break;
 
                 case 'tag2box':
                     foreach ($div->childNodes as $_tag_item) {
-                        $this->_tags[] = trim($_tag_item->nodeValue);
+                        $_tag = trim($_tag_item->nodeValue);
+                        if ($_tag != '' && $_tag !== 'null') {
+                            $this->_tags[] = $_tag;
+                        }
                     }
                     break;
 
@@ -92,8 +111,9 @@ class PostPageParser {
 
     public function save2md() {
 
-        if (config_item('inject_md_header')) {
-            $this->_md_content = $this->_make_md_header() . $this->_md_content;
+        $front_matter_style = config_item('front-matter');
+        if ($front_matter_style !== 'none' || $front_matter_style != '') {
+            $this->_md_content = $this->_make_front_matter($front_matter_style) . $this->_md_content;
         }
 
         //去掉文件名中不可用的符号
@@ -105,12 +125,27 @@ class PostPageParser {
         file_put_contents(config_item('save_path').'/'.$file_name, $this->_md_content);
     }
 
-    private function _make_md_header() {
-        $header = "Title: $this->_title\n"
-            ."Date: $this->_date\n"
-            ."Tags: ".join(',', $this->_tags)."\n\n";
+    private function _make_front_matter($style) {
+        $style = strtolower($style);
+        $prepared_styles = require BASE_PATH . 'front-matter.php';
+        if ( ! isset($prepared_styles[$style])) {
+            return '';
+        }
 
-        return $header;
+        $front_matter = $prepared_styles[$style];
+
+        if (isset($prepared_styles['date_format'])) {
+            $date = date($prepared_styles['date_format'], $this->_date);
+        } else {
+            $date = date('Y-m-d H:i:s', $this->_date);
+        }
+
+        $front_matter = preg_replace('/\{\stitle\s\}/', $this->_title, $front_matter);
+        $front_matter = preg_replace('/\{\sdate\s\}/', $date, $front_matter);
+        $front_matter = preg_replace('/\{\scategories\s\}/', join("\n- ", $this->_categories), $front_matter);
+        $front_matter = preg_replace('/\{\stags\s\}/', join("\n- ", $this->_tags), $front_matter);
+
+        return $front_matter;
     }
 
     /**
@@ -139,6 +174,7 @@ class PostPageParser {
                     $text = trim($text);
                 } else {
                     $text = trim($text, "\n");
+                    $text = trim($text, "\r\n");
                 }
             }
         }
