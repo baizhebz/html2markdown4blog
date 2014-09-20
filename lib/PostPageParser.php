@@ -140,10 +140,10 @@ class PostPageParser {
             $date = date('Y-m-d H:i:s', $this->_date);
         }
 
-        $front_matter = preg_replace('/\{\stitle\s\}/', $this->_title, $front_matter);
-        $front_matter = preg_replace('/\{\sdate\s\}/', $date, $front_matter);
-        $front_matter = preg_replace('/\{\scategories\s\}/', join("\n- ", $this->_categories), $front_matter);
-        $front_matter = preg_replace('/\{\stags\s\}/', join("\n- ", $this->_tags), $front_matter);
+        $front_matter = preg_replace('#\{\stitle\s\}#', $this->_title, $front_matter);
+        $front_matter = preg_replace('#\{\sdate\s\}#', $date, $front_matter);
+        $front_matter = preg_replace('#\{\scategories\s\}#', join("\n- ", $this->_categories), $front_matter);
+        $front_matter = preg_replace('#\{\stags\s\}#', join("\n- ", $this->_tags), $front_matter);
 
         return $front_matter;
     }
@@ -178,7 +178,7 @@ class PostPageParser {
                 }
             }
         }
-        elseif ($node->nodeType == XML_ELEMENT_NODE) {
+        else if ($node->nodeType == XML_ELEMENT_NODE) {
             if ($tag_name == 'p') {
                 if ($node->parentNode->nodeName == 'blockquote') {
                     $text_pre = '> ';
@@ -186,26 +186,26 @@ class PostPageParser {
                 }
                 $text_post = "\n";
             }
-            elseif ($tag_name == 'i' || $tag_name == 'em') {
+            else if ($tag_name == 'i' || $tag_name == 'em') {
                 $text_pre = '*';
                 $text_post = '*';
             }
-            elseif ($tag_name == 'b' || $tag_name == 'strong') {
+            else if ($tag_name == 'b' || $tag_name == 'strong') {
                 $text_pre = '**';
                 $text_post = '**';
             }
-            elseif ($tag_name == 'a') {
+            else if ($tag_name == 'a') {
                 $text_pre = '[';
                 $text_post = ']('.$node->getAttribute('href');
                 $text_post .= ($node->hasAttribute('title') ? ' "'.$node->getAttribute('title').'"' : '').')';
             }
-            elseif ($tag_name == 'img') {
+            else if ($tag_name == 'img') {
                 $text_pre = '![';
                 $text = $node->hasAttribute('alt') ? $node->getAttribute('alt') : '';
                 $text_post = ']('.$node->getAttribute('src');
                 $text_post .= ($node->hasAttribute('title') ? ' "'.$node->getAttribute('title').'"' : '').')';
             }
-            elseif ($tag_name == 'pre') {
+            else if ($tag_name == 'pre') {
                 //for csdn
                 $is_code = $node->hasAttribute('name') ? ($node->getAttribute('name') === 'code' ? true :false) : false;
                 if ($is_code) {
@@ -220,7 +220,7 @@ class PostPageParser {
                     $apply_general_code_style = true;
                 }
             }
-            elseif ($tag_name == 'code'){
+            else if ($tag_name == 'code'){
                 if ($node->parentNode->nodeName == 'pre') {
                     $apply_general_code_style = true;
                 } else {
@@ -228,27 +228,27 @@ class PostPageParser {
                     $text_post = '`';
                 }
             }
-            elseif ($tag_name == 'br') {
+            else if ($tag_name == 'br') {
                 $text_post = "\n";
             }
-            elseif ($tag_name == 'ul') {
+            else if ($tag_name == 'ul') {
                 $text_post = "\n";
             }
-            elseif ($tag_name == 'ol') {
+            else if ($tag_name == 'ol') {
                 $text_post = "\n";
                 $ol_no = 1;
             }
-            elseif ($tag_name == 'li') {
+            else if ($tag_name == 'li') {
                 if ($node->parentNode->nodeName == 'ul') {
                     $text_pre = '- ';
                 }
-                elseif ($node->parentNode->nodeName == 'ol') {
+                else if ($node->parentNode->nodeName == 'ol') {
                     //TODO: 支持ol嵌套
                     $text_pre = $ol_no++.'. ';
                 }
                 $text_post = "\n";
             }
-            elseif (in_array($tag_name, array('h1', 'h2', 'h3', 'h4', 'h5', 'h6'))) {
+            else if (in_array($tag_name, array('h1', 'h2', 'h3', 'h4', 'h5', 'h6'))) {
                 $level = (int)strrev($tag_name);
                 $text_pre = str_repeat('#', $level);
                 $text_post = "\n";
@@ -257,7 +257,7 @@ class PostPageParser {
                 $text_pre = '***';
                 $text_post = "\n";
             }
-            elseif ($tag_name == 'del') {
+            else if ($tag_name == 'del') {
                 $text_pre = '~~';
                 $text_post = '~~';
             }
