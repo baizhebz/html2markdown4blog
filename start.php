@@ -1,7 +1,7 @@
 <?php
 /**
- *这是一个专为blog制作的，将HTML形式的页面只保留文章内容，转换成Markdown格式的工具，
- * 转换完成后保存到本地目录。注意目前仅支持CSDN Blog。
+ *这是一个将传统博客系统迁移到使用Markdown格式书写的静态博客系统的工具。
+ *它能识别并截取HTML页面的文章内容，再转换成Markdown格式。注意目前仅支持 CSDN Blog!
  *
  * @author baizhe <baizhebz@gmail.com>
  */
@@ -55,12 +55,12 @@ if ($archive_url = config_item('archive_url')) {
 }
 
 $post_parser = new PostPageParser();
-foreach ($post_list as $index=>$eachPost) {
-    $post_parser->init($eachPost['url']);
+foreach ($post_list as $index=>$each_post) {
+    $post_parser->init($each_post['url']);
     $post_parser->parse();
     $post_parser->save2md();
 
-    $title = isset($eachPost['title']) ? $eachPost['title'] : $post_parser->get_title();
+    $title = isset($each_post['title']) ? $each_post['title'] : $post_parser->get_title();
     echo 'the ' . ordinalize(++$index). ' article already generated, title: ' . $title;
     echo "\n";
 
