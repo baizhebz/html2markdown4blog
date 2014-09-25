@@ -112,7 +112,7 @@ class PostPageParser {
     public function save2md() {
 
         $front_matter_style = config_item('front-matter');
-        if ($front_matter_style !== 'none' || $front_matter_style != '') {
+        if ($front_matter_style !== 'none' && $front_matter_style != '') {
             $this->_md_content = $this->_make_front_matter($front_matter_style) . $this->_md_content;
         }
 
@@ -123,7 +123,9 @@ class PostPageParser {
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             $file_name = iconv("utf-8", "gb2312", $file_name);
         }
-        $file_name = date('Y-m-d-', $this->_date).$file_name;
+        if (config_item('date_ahead_filename')) {
+            $file_name = date('Y-m-d-', $this->_date).$file_name;
+        }
 
         file_put_contents(config_item('save_path').'/'.$file_name, $this->_md_content);
     }
@@ -144,10 +146,11 @@ class PostPageParser {
         }
 
 
-        $front_matter = preg_replace('/\{\stitle\s\}/', $this->_title, $front_matter);
-        $front_matter = preg_replace('/\{\sdate\s\}/', $date, $front_matter);
-        $front_matter = preg_replace('/\{\scategories\s\}/', join(", ", $this->_categories), $front_matter);
-        $front_matter = preg_replace('/\{\stags\s\}/', join(", ", $this->_tags), $front_matter);
+        $front_matter = preg_replace('#\{\stitle\s\}#', $this->_title, $front_matter);
+        $front_matter = preg_replace('#\{\sdate\s\}#', $date, $front_matter);
+        $glue = ($style === strtolower('jekyll')) ? ", " : "\n- ";
+        $front_matter = preg_replace('#\{\scategories\s\}#', join($glue, $this->_categories), $front_matter);
+        $front_matter = preg_replace('#\{\stags\s\}#', join($glue, $this->_tags), $front_matter);
 
         return $front_matter;
     }
@@ -173,7 +176,7 @@ class PostPageParser {
             $text = $node->wholeText;
 
             if ($node->parentNode->nodeName != 'code' && $node->parentNode->nodeName != 'pre') {
-                $text = preg_replace('/^\s*$/', '', $text);
+                $text = preg_replace('#^\s*$#', '', $text);
                 if ($node->parentNode->nodeName == 'p') {
                     $text = trim($text);
                 } else {

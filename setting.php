@@ -18,6 +18,9 @@ return array(
     //front-matter的具体配置见 front-matter.php 文件，可以自行调整
     'front-matter' => 'Jekyll',
 
+    //是否在文件名前插入日期，即Y-m-d-title的形式
+    'date_ahead_filename' => false,
+
     //是否使用github风格的code blocks的语法，即以在代码块开头和结尾加上```来替换掉在每行开头插入制表符的方式
     'github_code_block_style' => true
 );
