@@ -120,7 +120,10 @@ class PostPageParser {
         $file_name = str_replace(array('\\', '/', '?', ':', '*', '<', '>', '"', '|'), '', $this->_title) . '.' .'md';
 
         //windows下中文文件名乱码，其他系统不清楚会不会有这个问题
-        $file_name = iconv("utf-8", "gb2312", $file_name);
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $file_name = iconv("utf-8", "gb2312", $file_name);
+        }
+        $file_name = date('Y-m-d-', $this->_date).$file_name;
 
         file_put_contents(config_item('save_path').'/'.$file_name, $this->_md_content);
     }
@@ -140,10 +143,11 @@ class PostPageParser {
             $date = date('Y-m-d H:i:s', $this->_date);
         }
 
-        $front_matter = preg_replace('#\{\stitle\s\}#', $this->_title, $front_matter);
-        $front_matter = preg_replace('#\{\sdate\s\}#', $date, $front_matter);
-        $front_matter = preg_replace('#\{\scategories\s\}#', join("\n- ", $this->_categories), $front_matter);
-        $front_matter = preg_replace('#\{\stags\s\}#', join("\n- ", $this->_tags), $front_matter);
+
+        $front_matter = preg_replace('/\{\stitle\s\}/', $this->_title, $front_matter);
+        $front_matter = preg_replace('/\{\sdate\s\}/', $date, $front_matter);
+        $front_matter = preg_replace('/\{\scategories\s\}/', join(", ", $this->_categories), $front_matter);
+        $front_matter = preg_replace('/\{\stags\s\}/', join(", ", $this->_tags), $front_matter);
 
         return $front_matter;
     }
