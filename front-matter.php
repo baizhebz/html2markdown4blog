@@ -15,12 +15,11 @@
 
 $jekyll = <<<JEKYLL
 ---
+layout: post
 title: { title }
 date: { date }
-categories:
-- { categories }
-tags:
-- { tags }
+categories: [{ categories }]
+tags: [{ tags }]
 ---
 
 JEKYLL;
