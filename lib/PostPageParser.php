@@ -121,7 +121,7 @@ class PostPageParser {
 
         //windows下中文文件名乱码，其他系统不清楚会不会有这个问题
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $file_name = iconv("utf-8", "gb2312", $file_name);
+            $file_name = @iconv("utf-8", "gb2312//IGNORE", $file_name);
         }
         if (config_item('date_ahead_filename')) {
             $file_name = date('Y-m-d-', $this->_date).$file_name;
