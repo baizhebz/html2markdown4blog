@@ -214,11 +214,10 @@ class PostPageParser {
             }
             else if ($tag_name == 'pre') {
                 //for csdn
-                $is_code = $node->hasAttribute('name') ? ($node->getAttribute('name') === 'code' ? true :false) : false;
-                if ($is_code) {
+                if ($this->_is_csdn_code_node($node)) {
                     if (config_item('github_code_block_style') == true) {
                         $lang = $node->hasAttribute('class') ? $node->getAttribute('class') : '';
-                        $text_pre = "```$lang\n";
+                        $text_pre = "\n```$lang\n";
                         $text_post = "\n```\n";
                     } else {
                         $apply_general_code_style = true;
@@ -233,6 +232,17 @@ class PostPageParser {
                 } else {
                     $text_pre = '`';
                     $text_post = '`';
+                }
+            }
+            else if ($tag_name == 'textarea') {
+                if ($this->_is_csdn_code_node($node)) {
+                    if (config_item('github_code_block_style') == true) {
+                        $lang = $node->hasAttribute('class') ? $node->getAttribute('class') : '';
+                        $text_pre = "\n```$lang\n";
+                        $text_post = "\n```\n";
+                    } else {
+                        $apply_general_code_style = true;
+                    }
                 }
             }
             else if ($tag_name == 'br') {
@@ -291,6 +301,10 @@ class PostPageParser {
 
         $markdown .= $text_pre.$text.$text_post;
         return $markdown;
+    }
+
+    private function _is_csdn_code_node($node) {
+        return $node->hasAttribute('name') ? ($node->getAttribute('name') === 'code' ? true :false) : false;
     }
 
     public function get_title() {
